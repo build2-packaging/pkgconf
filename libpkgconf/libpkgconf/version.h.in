@@ -1,0 +1,10 @@
+/* file      : libpkgconf/version.h.in -*- C -*-
+ * copyright : Copyright (c) 2016-2019 Code Synthesis Ltd
+ * license   : ISC; see accompanying COPYING file
+ */
+
+#ifndef PACKAGE_VERSION /* Note: using the version macro itself. */
+
+#define PACKAGE_VERSION "$libpkgconf.version.project_id$"
+
+#endif /* PACKAGE_VERSION */

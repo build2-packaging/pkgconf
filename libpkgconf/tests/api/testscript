@@ -1,0 +1,116 @@
+# file      : tests/api/testscript
+# copyright : Copyright (c) 2016-2019 Code Synthesis Ltd
+# license   : ISC; see accompanying COPYING file
+
+: double-quoted
+:
+{
+  +cat <<EOI >=libfoo.pc
+  prefix="C:\\Program   Files\\Foo"
+  exec_prefix=${prefix}
+  var="A\"B" 'C\'D'
+  Name: libfoo
+  Description: Foo library
+  Version: 1.0
+  Libs: "-LC:\\Program   Files\\Foo" "-lC:\\Program   Files\\Foo\\foo"
+  Cflags: "-IC:\\Program   Files\\Foo"
+  EOI
+
+  f = $~/libfoo.pc
+
+  : cflags
+  :
+  $* --cflags $f >>EOO
+  I C:\Program   Files\Foo
+  EOO
+
+  : libs
+  :
+  $* --libs $f >>EOO
+  L C:\Program   Files\Foo
+  l C:\Program   Files\Foo\foo
+  EOO
+
+  : vars
+  :
+  $* --vars $f >>EOO
+  var A"B 'C\'D'
+  exec_prefix C:\\Program   Files\\Foo
+  prefix C:\\Program   Files\\Foo
+  EOO
+}
+
+: single-quoted
+{
+  +cat <<EOI >=libfoo.pc
+  prefix='C:\Program   Files\Foo'
+  exec_prefix=${prefix}
+  var='A\'B' "C\"D"
+  Name: libfoo
+  Description: Foo library
+  Version: 1.0
+  Libs: '-LC:\Program   Files\Foo' '-lC:\Program   Files\Foo\foo'
+  Cflags: '-IC:\Program   Files\Foo'
+  EOI
+
+  f = $~/libfoo.pc
+
+  : cflags
+  :
+  $* --cflags $f >>EOO
+  I C:\Program   Files\Foo
+  EOO
+
+  : libs
+  :
+  $* --libs $f >>EOO
+  L C:\Program   Files\Foo
+  l C:\Program   Files\Foo\foo
+  EOO
+
+  : vars
+  :
+  $* --vars $f >>EOO
+  var A'B "C\"D"
+  exec_prefix C:\Program   Files\Foo
+  prefix C:\Program   Files\Foo
+  EOO
+}
+
+: unquoted
+:
+{
+  +cat <<EOI >=libfoo.pc
+  prefix=C:\\Program\ \ \ Files\\Foo
+  exec_prefix=${prefix}
+  var=X A\'B' "C\"D"
+  Name: libfoo
+  Description: Foo library
+  Version: 1.0
+  Libs: -LC:\\Program\ \ \ Files\\Foo -lC:\\Program\ \ \ Files\\Foo\\foo
+  Cflags: -IC:\\Program\ \ \ Files\\Foo
+  EOI
+
+  f = $~/libfoo.pc
+
+  : cflags
+  :
+  $* --cflags $f >>EOO
+  I C:\Program   Files\Foo
+  EOO
+
+  : libs
+  :
+  $* --libs $f >>EOO
+  L C:\Program   Files\Foo
+  l C:\Program   Files\Foo\foo
+  EOO
+
+  : vars
+  :
+  $* --vars $f >>EOO
+  var X A\'B' "C\"D"
+  exec_prefix C:\\Program\ \ \ Files\\Foo
+  prefix C:\\Program\ \ \ Files\\Foo
+  EOO
+}

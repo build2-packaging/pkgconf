@@ -1,0 +1,65 @@
+This document describes an approach applied to packaging pkgconf for build2.
+In particular, this understanding will be useful when upgrading to a new
+upstream version.
+
+The upstream package contains the libpkgconf library and the pkgconf program.
+Currently, we only package the library.
+
+We add the upstream package as a git submodule and symlink the required files
+and subdirectories into the build2 package subdirectories. Then, when required,
+we "overlay" the upstream with our own header/source files.
+
+Note that symlinking upstream submodule subdirectories into a build2 package
+subdirectory results in creating intermediate build files (.d, .o, etc) inside
+upstream directory while building the package in source tree. That's why we
+need to make sure that packages do not share upstream source files via
+subdirectory symlinks, not to also share the related intermediate files. If
+several packages need to compile the same upstream source file, then only one
+of them can symlink it via the parent directory while others must symlink it
+directly. We also add the `ignore = untracked` configuration option into
+.gitmodules to make sure that git ignores the intermediate build files under
+upstream/ subdirectory.
+
+Normally, when packaging an autoconf/cmake-based project, we try to deduce the
+source file and compilation/linking option sets analyzing the configure.ac,
+CMakeLists.txt, and .cmake files. In practice, however, that can be uneasy and
+error prone, so you may also need to refer to make/configuration files
+produced by the configure script/cmake or, as a last resort, to see the
+actual compiler and linker command lines in the build log. If that's the case,
+you can configure/build the upstream package on the platform of interest
+running the following commands in the project root directory.
+
+On POSIX and in MinGW shell on Windows:
+
+$ ./autogen.sh
+$ mkdir build
+$ cd build
+$ ../configure >build.log 2>&1
+$ make AM_DEFAULT_VERBOSITY=1 >>build.log 2>&1
+
+Note: 1.6.1 fails to build pkgconf utility with MinGW GCC (see issue #37 for
+details).
+
+With MSVC on Windows:
+
+Run Visual Studio and change the settings:
+
+Tools >
+  Options >
+    Projects and Solutions >
+      Build and Run >
+        MSBuild project build output verbosity: Detailed
+
+> mkdir build
+> cd build
+> cmake .. >build.log 2>&1
+> devenv pkgconf.sln /build >>build.log 2>&1
+
+When the packaging is complete, build all the project packages in source tree
+and make sure that all the preprocessor include directives reference the
+packaged header files, rather than pkgconf headers that are installed into the
+system:
+
+$ cat `find . -type f -name '*.d'` | sort -u >headers
+$ emacs headers  # Edit, leaving system headers only.
+$ fgrep -e 'pkgconf' headers

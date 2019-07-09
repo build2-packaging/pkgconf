@@ -1,0 +1,155 @@
+# file      : libpkgconf/buildfile
+# copyright : Copyright (c) 2016-2019 Code Synthesis Ltd
+# license   : ISC; see accompanying COPYING file
+
+lib{pkgconf}: {h c}{* -version} {h}{version}
+
+tclass = $c.target.class
+
+bsd     = ($tclass == 'bsd')
+macos   = ($tclass == 'macos')
+windows = ($tclass == 'windows')
+
+msvc = ($c.class == 'msvc')
+
+# The version file is internal (it is only included from the internal
+# config.h) so we don't distribute nor install it (see below).
+#
+h{version}: in{version} $src_root/manifest
+
+# Build options.
+#
+# Note that we have to add "-I$src_root" for the headers auto-generating
+# machinery to work properly.
+#
+c.poptions =+ "-I$out_root" "-I$src_root"
+
+# Define the PKG_DEFAULT_PATH, SYSTEM_INCLUDEDIR and SYSTEM_LIBDIR macros.
+# The whole idea feels utterly broken (hello cross-compilation) so we will
+# just do bare minimum and wait and see.
+#
+# There is also PERSONALITY_PATH macro added in 1.5.1. It looks like the
+# personality files are invented to fix cross-compilation but are unlikely to
+# have any noticeable distribution yet. Normally these files are located in
+# the personality.d/ subdirectory of the .pc files directory.
+#
+# @@ We should probably allow to configure these macros via configuration
+#    variables config.pkgconfig.pkg_default_path and alike.
+#
+if! $windows
+{
+  inc_dirs = "/usr/include"
+  lib_dirs = "/usr/lib"
+
+  if ($install.root != [null])
+  {
+    def_dirs = "$install.resolve($install.pkgconfig)"
+    personality_dirs = "$def_dirs/personality.d"
+  }
+  else
+  {
+    def_dirs = ""
+    personality_dirs = ""
+  }
+}
+else
+{
+  inc_dirs = ""
+  lib_dirs = ""
+
+  # Note that on Windows PKG_DEFAULT_PATH macros is internally redefined as
+  # "../lib/pkgconfig;../share/pkgconfig" and is used as a fallback. Normally
+  # the default path is relative to the program's (that link the library)
+  # directory and has the following format:
+  #
+  # <dir>/../lib/pkgconfig;<dir>/../share/pkgconfig
+  #
+  # So we keep the macros empty.
+  #
+  def_paths = ""
+  personality_dirs = ""
+}
+
+c.poptions += -DPKG_DEFAULT_PATH=\"$def_dirs\" \
+              -DSYSTEM_INCLUDEDIR=\"$inc_dirs\"  \
+              -DSYSTEM_LIBDIR=\"$lib_dirs\" \
+              -DPERSONALITY_PATH=\"$personality_dirs\"
+
+# Disable warnings.
+#
+if $msvc
+  c.coptions += /wd4996 /wd4267
+
+# Note: this should go last as it adds obj target-specific options.
+#
+if! $windows
+{
+  # Upstream package compiles the source files with -std=gnu99 option to allow
+  # some GNU deviations from the ISO C99 standard. We will compile with
+  # -std=c9x option (is implied by c.std=99 in root.build) and define
+  # _GNU_SOURCE for the source files that require such deviations. This macro
+  # also re-enables definitions of POSIX macros (specifically PATH_MAX) that
+  # are disabled by -std=c9x.
+  #
+  # Note that on FreeBSD and MacOS -D_POSIX_C_SOURCE disables declarations of
+  # strndup(), strlcpy() and alike, that are not POSIX. Not very consistent
+  # given that they are also not C99. Luckily, -std=c9x doesn't disable
+  # PATH_MAX on these OSes, so we just don't define the macro for them.
+  #
+  # @@ It all becomes a bit hairy. Should we just undefine the corresponding
+  #    HAVE_* macros in config.h, so the custom function implementations are
+  #    picked up? Alternatively, can we stop specifying the C standard and
+  #    defining _POSIX_C_SOURCE macro altogether?
+  #
+  if! ($bsd || $macos)
+    c.poptions += -D_POSIX_C_SOURCE=200112L
+
+  obj{client fragment path personality pkg queue tuple}: \
+    c.poptions += -D_GNU_SOURCE
+}
+else
+{
+  cc.poptions += -DWIN32 -D_WINDOWS -D_MBCS
+
+  if $msvc
+    cc.coptions += /GS /fp:precise /Zc:wchar_t /Zc:forScope
+
+  # See libpkgconf-api.h for details.
+  #
+  objs{*}: c.poptions += -DLIBPKGCONF_EXPORT
+  obja{*}: c.poptions += -DPKGCONFIG_IS_STATIC
+
+  c.libs += $regex.apply(advapi32, '(.+)', $msvc ? '\1.lib' : '-l\1')
+}
+
+# Export options.
+#
+lib{pkgconf}:  cc.export.poptions = "-I$src_root"
+liba{pkgconf}: cc.export.poptions += -DPKGCONFIG_IS_STATIC
+
+# See bootstrap.build for details.
+#
+if $version.pre_release
+  lib{pkgconf}: bin.lib.version = @"-$version.project_id"
+else
+  lib{pkgconf}: bin.lib.version = @"-$release_num"
+
+# Install into the pkgconf/libpkgconf/ subdirectory of, say, /usr/include/.
+# Also make sure Cflags is properly set in .pc files to pkgconfig/.
+#
+h{*}: install = include/libpkgconf/
+install.include = $install.include/pkgconf/
+
+# Internal auto-generated header (see above).
+#
+h{version}: install = false
+
+# Implementation details.
+#
+# The upstream's config.h is generated during the configuration phase. We
+# distribute a custom one with a minimal set of macro definitions required to
+# build the project. Note that the file is internal (is only included from C
+# files) and so is not installed.
+#
+for h: config stdinc win-dirent
+  h{$h}@./: install = false

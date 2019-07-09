@@ -1,0 +1,35 @@
+This document describes how libpkgconf was packaged for build2. In particular,
+this understanding will be useful when upgrading to a new upstream version.
+See ../README-DEV for general notes on pkgconf packaging.
+
+Symlink the required upstream files and directories and provide our own
+implementations for auto-generated headers:
+
+$ ln -s ../upstream/{AUTHORS,COPYING} ./
+
+$ ln -s ../../upstream/libpkgconf/config.h.cmake.in \
+  libpkgconf/config.h.cmake.in.orig
+
+$ cd libpkgconf && ln -s ../../upstream/libpkgconf/*.{c,h} ./
+
+Use libpkgconf/config.h.cmake.in.orig for creating libpkgconf/config.h and
+libpkgconf/version.h.in, defining/undefining macros introduced with
+#cmakedefine.
+
+Re-creating libpkgconf/config.h from scratch every time we upgrade to a new
+upstream version would be a real pain. Instead we can only (un)define the
+newly introduced macros, comparing the already defined and currently used
+macro sets:
+
+$ for m in `cat libpkgconf/config.h.cmake.in.orig | \
+            sed -n 's/.*#\s*cmakedefine\s\{1,\}\([_a-zA-Z0-9]\{1,\}\)\(\s.*\)\{0,1\}$/\1/p' | sort -u`; do
+    if grep -q -e "\b$m\b" `find -L . -name '*.h' -a ! -name config.h -a ! -name version.h -o -name '*.c'`; then
+      echo "$m"
+    fi
+  done >used-macros
+
+$ cat libpkgconf/config.h |
+  sed -n 's/#\s*\(define\|undef\)\s\{1,\}\([_a-zA-Z0-9]\{1,\}\)\(\s.*\)\{0,1\}$/\2/p' |
+  sort -u >defined-macros
+
+$ diff defined-macros used-macros >diff-macros
