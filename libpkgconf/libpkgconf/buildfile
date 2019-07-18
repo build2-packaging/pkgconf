@@ -2,7 +2,7 @@
 # copyright : Copyright (c) 2016-2019 Code Synthesis Ltd
 # license   : ISC; see accompanying COPYING file
 
-lib{pkgconf}: {h c}{* -version} {h}{version}
+lib{pkgconf}: {h c}{* -config} {h}{config}
 
 tclass = $c.target.class
 
@@ -12,21 +12,9 @@ windows = ($tclass == 'windows')
 
 msvc = ($c.class == 'msvc')
 
-# The version file is internal (it is only included from the internal
-# config.h) so we don't distribute nor install it (see below).
-#
-h{version}: in{version} $src_root/manifest
-
-# Build options.
-#
-# Note that we have to add "-I$src_root" for the headers auto-generating
-# machinery to work properly.
-#
-c.poptions =+ "-I$out_root" "-I$src_root"
-
-# Define the PKG_DEFAULT_PATH, SYSTEM_INCLUDEDIR and SYSTEM_LIBDIR macros.
-# The whole idea feels utterly broken (hello cross-compilation) so we will
-# just do bare minimum and wait and see.
+# Assign variables for the PKG_DEFAULT_PATH, SYSTEM_INCLUDEDIR, and
+# SYSTEM_LIBDIR macro definitions. The whole idea feels utterly broken (hello
+# cross-compilation) so we will just do bare minimum and wait and see.
 #
 # There is also PERSONALITY_PATH macro added in 1.5.1. It looks like the
 # personality files are invented to fix cross-compilation but are unlikely to
@@ -66,21 +54,39 @@ else
   #
   # So we keep the macros empty.
   #
-  def_paths = ""
+  def_dirs = ""
   personality_dirs = ""
 }
 
-c.poptions += -DPKG_DEFAULT_PATH=\"$def_dirs\" \
-              -DSYSTEM_INCLUDEDIR=\"$inc_dirs\"  \
-              -DSYSTEM_LIBDIR=\"$lib_dirs\" \
-              -DPERSONALITY_PATH=\"$personality_dirs\"
+# The config header is internal (is only included from C files), so we don't
+# distribute nor install it (see below).
+#
+h{config}: in{config}
+{
+  PACKAGE_VERSION = "$version.project_id"
+
+  # Escape backslashes and quotes in the directory paths prior to representing
+  # them as C string literals.
+  #
+  SYSTEM_INCLUDEDIR = $regex.replace($inc_dirs, '(\\|")', '\\\1')
+  SYSTEM_LIBDIR     = $regex.replace($lib_dirs, '(\\|")', '\\\1')
+  PKG_DEFAULT_PATH  = $regex.replace($def_dirs, '(\\|")', '\\\1')
+  PERSONALITY_PATH  = $regex.replace($personality_dirs, '(\\|")', '\\\1')
+}
+
+# Build options.
+#
+# Note that we have to add "-I$src_root" for the headers auto-generating
+# machinery to work properly.
+#
+c.poptions =+ "-I$out_root" "-I$src_root"
 
 # Disable warnings.
 #
 if $msvc
   c.coptions += /wd4996 /wd4267
 
-# Note: this should go last as it adds obj target-specific options.
+# Note: this should go last as it adds obj target-specific poptions.
 #
 if! $windows
 {
@@ -109,11 +115,6 @@ if! $windows
 }
 else
 {
-  cc.poptions += -DWIN32 -D_WINDOWS -D_MBCS
-
-  if $msvc
-    cc.coptions += /GS /fp:precise /Zc:wchar_t /Zc:forScope
-
   # See libpkgconf-api.h for details.
   #
   objs{*}: c.poptions += -DLIBPKGCONF_EXPORT
@@ -140,16 +141,9 @@ else
 h{*}: install = include/libpkgconf/
 install.include = $install.include/pkgconf/
 
-# Internal auto-generated header (see above).
-#
-h{version}: install = false
-
 # Implementation details.
 #
-# The upstream's config.h is generated during the configuration phase. We
-# distribute a custom one with a minimal set of macro definitions required to
-# build the project. Note that the file is internal (is only included from C
-# files) and so is not installed.
-#
-for h: config stdinc win-dirent
+h{config}: install = false
+
+for h: stdinc win-dirent
   h{$h}@./: install = false

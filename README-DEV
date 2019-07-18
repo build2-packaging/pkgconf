@@ -20,14 +20,14 @@ directly. We also add the `ignore = untracked` configuration option into
 .gitmodules to make sure that git ignores the intermediate build files under
 upstream/ subdirectory.
 
-Normally, when packaging an autoconf/cmake-based project, we try to deduce the
-source file and compilation/linking option sets analyzing the configure.ac,
-CMakeLists.txt, and .cmake files. In practice, however, that can be uneasy and
-error prone, so you may also need to refer to make/configuration files
-produced by the configure script/cmake or, as a last resort, to see the
-actual compiler and linker command lines in the build log. If that's the case,
-you can configure/build the upstream package on the platform of interest
-running the following commands in the project root directory.
+Normally, when packaging an autoconf/meson-based project, we try to deduce the
+source file and compilation/linking option sets analyzing the configure.ac and
+meson* files. In practice, however, that can be uneasy and error prone, so you
+may also need to refer to make/configuration files produced by the configure
+script/meson or, as a last resort, to see the actual compiler and linker
+command lines in the build log. If that's the case, you can configure/build
+the upstream package on the platform of interest running the following
+commands in the project root directory.
 
 On POSIX and in MinGW shell on Windows:
 
@@ -37,23 +37,16 @@ $ cd build
 $ ../configure >build.log 2>&1
 $ make AM_DEFAULT_VERBOSITY=1 >>build.log 2>&1
 
-Note: 1.6.1 fails to build pkgconf utility with MinGW GCC (see issue #37 for
-details).
-
 With MSVC on Windows:
 
-Run Visual Studio and change the settings:
-
-Tools >
-  Options >
-    Projects and Solutions >
-      Build and Run >
-        MSBuild project build output verbosity: Detailed
-
-> mkdir build
+> meson -Dtests=false
 > cd build
-> cmake .. >build.log 2>&1
-> devenv pkgconf.sln /build >>build.log 2>&1
+> ninja
+
+Note that you cannot see the build command options running ninja in the
+verbose mode (-v) as it passes them to the compiler and linker via temporary
+option files. However, you can see them in the meson-generated build.ninja
+file.
 
 When the packaging is complete, build all the project packages in source tree
 and make sure that all the preprocessor include directives reference the

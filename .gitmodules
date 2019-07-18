@@ -1,4 +1,4 @@
 [submodule "upstream"]
 	path = upstream
-	url = https://git.dereferenced.org/pkgconf/pkgconf.git
+	url = https://git.sr.ht/~kaniini/pkgconf
 	ignore = untracked
