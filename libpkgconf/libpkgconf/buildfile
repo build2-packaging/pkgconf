@@ -90,7 +90,7 @@ if $msvc
   c.coptions += /wd4996 /wd4267
 
 if $clang_msvc
-  c.coptions += -Wno-deprecated-declarations
+  c.coptions += -Wno-deprecated-declarations -Wno-unused-function
 
 # Note: this should go last as it adds obj target-specific poptions.
 #
