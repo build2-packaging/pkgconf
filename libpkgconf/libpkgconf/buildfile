@@ -88,8 +88,7 @@ c.poptions =+ "-I$out_root" "-I$src_root"
 #
 if $msvc
   c.coptions += /wd4996 /wd4267
-
-if $clang_msvc
+elif $clang_msvc
   c.coptions += -Wno-deprecated-declarations -Wno-unused-function
 
 # Note: this should go last as it adds obj target-specific poptions.
