@@ -19,13 +19,15 @@
 #define PACKAGE_VERSION "$PACKAGE_VERSION$"
 
 /*
- * strndup() is not present on Windows, for gcc and clang if compile with
- * -std=C99, except for FreeBSD and MacOS.
+ * strndup() is not present on Windows while strl*() are only present on
+ * FreeBSD and MacOS.
  *
- * strl*() are only present on FreeBSD and MacOS.
  */
-#if defined(__FreeBSD__) || defined(__APPLE__)
+#if !defined(_WIN32)
 #  define HAVE_STRNDUP 1
+#endif
+
+#if defined(__FreeBSD__) || defined(__APPLE__)
 #  define HAVE_STRLCPY 1
 #  define HAVE_STRLCAT 1
 #endif
