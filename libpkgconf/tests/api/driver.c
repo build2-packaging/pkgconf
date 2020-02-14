@@ -1,5 +1,4 @@
 /* file      : tests/api/driver.c
- * copyright : Copyright (c) 2016-2019 Code Synthesis Ltd
  * license   : ISC; see accompanying COPYING file
  */
 
@@ -40,7 +39,7 @@ frags_print_and_free (pkgconf_list_t* list)
   PKGCONF_FOREACH_LIST_ENTRY(list->head, node)
   {
     pkgconf_fragment_t* frag = node->data;
-    printf("%c %s\n", frag->type, frag->data);
+    printf("%c %s\n", frag->type != '\0' ? frag->type : ' ', frag->data);
   }
 
   pkgconf_fragment_free (list);
@@ -155,12 +154,17 @@ main (int argc, const char* argv[])
       }
     case dump_libs:
       {
+        pkgconf_client_set_flags (c,
+                                  PKGCONF_PKG_PKGF_SEARCH_PRIVATE |
+                                  PKGCONF_PKG_PKGF_MERGE_PRIVATE_FRAGMENTS);
+
         pkgconf_list_t list = PKGCONF_LIST_INITIALIZER;
         e = pkgconf_pkg_libs (c, p, &list, max_depth);
 
         if (e == PKGCONF_PKG_ERRF_OK)
           frags_print_and_free (&list);
 
+        pkgconf_client_set_flags (c, 0); /* Restore. */
         break;
       }
     case dump_vars:

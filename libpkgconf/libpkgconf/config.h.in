@@ -1,5 +1,4 @@
 /* file      : libpkgconf/config.h.in -*- C -*-
- * copyright : Copyright (c) 2016-2019 Code Synthesis Ltd
  * license   : ISC; see accompanying COPYING file
  */
 #ifndef LIBPKGCONF_CONFIG_H

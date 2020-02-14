@@ -1,6 +1,6 @@
 : 1
 name: libpkgconf
-version: 1.6.3
+version: 1.6.3+1
 project: pkgconf
 summary: C library for retriving pkg-config compiler and linker flags
 license: ISC, MIT ; ISC for the most of original files.
