@@ -29,3 +29,18 @@ $ cat libpkgconf/config.h.in |
   sort -u >defined-macros
 
 $ diff defined-macros used-macros
+
+We also extend the upstream package functionality allowing to prevent merging
+of "special" fragments, such as `-framework <name>`, into a single fragment.
+
+$ mv libpkgconf.h libpkgconf.h.orig
+$ cp libpkgconf.h.orig libpkgconf.h
+
+$ mv fragment.c fragment.c.orig
+$ cp fragment.c.orig fragment.c
+
+$ git apply dont-merge-fragments.patch
+
+Note that the patch is produces by the following command:
+
+$ git diff >dont-merge-fragments.patch

@@ -114,9 +114,9 @@
     EOO
 }
 
-: merged
+: no-merge
 :
-: Note that we want the merged options to be eventually separated.
+: Test that the -framework options are not merged into a single fragment.
 :
 {
   +cat <<EOI >=libfoo.pc
@@ -137,6 +137,9 @@
     l ssl
     l crypto
     l z
-      -framework CoreFoundation -framework Security
+      -framework
+      CoreFoundation
+      -framework
+      Security
     EOO
 }

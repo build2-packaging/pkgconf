@@ -130,7 +130,7 @@ main (int argc, const char* argv[])
   int r = 1;
   int max_depth = 2000;
 
-  pkgconf_client_set_flags (c, 0);
+  pkgconf_client_set_flags (c, PKGCONF_PKG_PKGF_DONT_MERGE_SPECIAL_FRAGMENTS);
   pkgconf_pkg_t* p = pkgconf_pkg_find (c, path);
 
   if (p != NULL)
