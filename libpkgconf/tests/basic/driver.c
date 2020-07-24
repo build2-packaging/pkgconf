@@ -2,8 +2,7 @@
  * license   : ISC; see accompanying COPYING file
  */
 
-/*
- * Enable assertions.
+/* Enable assertions.
  */
 #ifdef NDEBUG
 #  undef NDEBUG
@@ -24,8 +23,7 @@ error_handler (const char* msg, const pkgconf_client_t* c, const void* d)
   (void) c; /* Unused. */
   (void) d; /* Unused. */
 
-  /*
-   * Seems it always have a trailing newline char. Probably it still a good
+  /* Seems it always have a trailing newline char. Probably it still a good
    * idea to check if it is. Let's see if it ever be missed.
    *
    */
@@ -45,8 +43,7 @@ print_and_free (pkgconf_list_t* list)
   pkgconf_fragment_free (list);
 }
 
-/*
- * Usage: argv[0] [--cflags] [--libs] (--with-path <dir>)* <name>
+/* Usage: argv[0] [--cflags] [--libs] (--with-path <dir>)* <name>
  *
  * Print package compiler and linker flags. If the package name has '.pc'
  * extension it is interpreted as a file name. Prints all flags, as pkgconf
@@ -109,8 +106,7 @@ main (int argc, const char* argv[])
 
   pkgconf_client_set_flags (c, client_flags);
 
-  /*
-   * Bootstrap the package search default paths if not specified explicitly.
+  /* Bootstrap the package search default paths if not specified explicitly.
    */
   if (default_dirs)
     pkgconf_client_dir_list_build (c, pkgconf_cross_personality_default ());
@@ -121,8 +117,7 @@ main (int argc, const char* argv[])
   {
     int e = PKGCONF_PKG_ERRF_OK;
 
-    /*
-     * Print C flags.
+    /* Print C flags.
      */
     if (cflags)
     {
@@ -139,8 +134,7 @@ main (int argc, const char* argv[])
       pkgconf_client_set_flags (c, client_flags); /* Restore. */
     }
 
-    /*
-     * Print libs.
+    /* Print libs.
      */
     if (libs && e == PKGCONF_PKG_ERRF_OK)
     {

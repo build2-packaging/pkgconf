@@ -257,9 +257,17 @@ PKGCONF_API pkgconf_cross_personality_t *pkgconf_cross_personality_find(const ch
 #define PKGCONF_PKG_ERRF_PACKAGE_CONFLICT	0x4
 #define PKGCONF_PKG_ERRF_DEPGRAPH_BREAK		0x8
 
+/* Note that MinGW's printf() format semantics have changed starting GCC 10
+ * (see stdinc.h for details).
+ */
 #if defined(__GNUC__) || defined(__INTEL_COMPILER)
-#define PRINTFLIKE(fmtarg, firstvararg) \
-        __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
+# if defined (_WIN32) && defined(__GNUC__) && __GNUC__ >= 10
+#  define PRINTFLIKE(fmtarg, firstvararg) \
+          __attribute__((__format__ (gnu_printf, fmtarg, firstvararg)))
+# else
+#  define PRINTFLIKE(fmtarg, firstvararg) \
+          __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
+#endif
 #define DEPRECATED \
         __attribute__((deprecated))
 #else

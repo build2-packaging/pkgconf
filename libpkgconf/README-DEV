@@ -44,3 +44,10 @@ $ git apply dont-merge-fragments.patch
 Note that the patch is produces by the following command:
 
 $ git diff >dont-merge-fragments.patch
+
+Also fix the MinGW GCC 10 -Wformat warning:
+
+$ mv stdinc.h stdinc.h.orig
+$ cp stdinc.h.orig stdinc.h
+
+$ git apply fix-mingw-wformat-warning.patch

@@ -1,0 +1,53 @@
+diff --git a/libpkgconf/libpkgconf/libpkgconf.h b/libpkgconf/libpkgconf/libpkgconf.h
+index 6f4c8b5..a7d9f9d 100644
+--- a/libpkgconf/libpkgconf/libpkgconf.h
++++ b/libpkgconf/libpkgconf/libpkgconf.h
+@@ -257,9 +257,17 @@ PKGCONF_API pkgconf_cross_personality_t *pkgconf_cross_personality_find(const ch
+ #define PKGCONF_PKG_ERRF_PACKAGE_CONFLICT	0x4
+ #define PKGCONF_PKG_ERRF_DEPGRAPH_BREAK		0x8
+ 
++/* Note that MinGW's printf() format semantics have changed starting GCC 10
++ * (see stdinc.h for details).
++ */
+ #if defined(__GNUC__) || defined(__INTEL_COMPILER)
+-#define PRINTFLIKE(fmtarg, firstvararg) \
+-        __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
++# if defined (_WIN32) && defined(__GNUC__) && __GNUC__ >= 10
++#  define PRINTFLIKE(fmtarg, firstvararg) \
++          __attribute__((__format__ (gnu_printf, fmtarg, firstvararg)))
++# else
++#  define PRINTFLIKE(fmtarg, firstvararg) \
++          __attribute__((__format__ (__printf__, fmtarg, firstvararg)))
++#endif
+ #define DEPRECATED \
+         __attribute__((deprecated))
+ #else
+diff --git a/libpkgconf/libpkgconf/stdinc.h b/libpkgconf/libpkgconf/stdinc.h
+index 6858503..361f27e 100644
+--- a/libpkgconf/libpkgconf/stdinc.h
++++ b/libpkgconf/libpkgconf/stdinc.h
+@@ -31,11 +31,21 @@
+ # include <windows.h>
+ # include <malloc.h>
+ # define PATH_DEV_NULL	"nul"
+-# ifdef _WIN64
+-#  define SIZE_FMT_SPECIFIER	"%I64u"
++
++/* Note that MinGW's printf() format semantics have changed starting GCC 10.
++ * In particular, GCC 10 complains about MSVC's 'I64' length modifier but now
++ * accepts the standard (C99) 'z' modifier.
++ */
++# if defined(__GNUC__) && __GNUC__ >= 10
++#  define SIZE_FMT_SPECIFIER	"%zu"
+ # else
+-#  define SIZE_FMT_SPECIFIER	"%u"
++#  ifdef _WIN64
++#   define SIZE_FMT_SPECIFIER	"%I64u"
++#  else
++#   define SIZE_FMT_SPECIFIER	"%u"
++#  endif
+ # endif
++
+ # ifndef ssize_t
+ # ifndef __MINGW32__
+ #  include <BaseTsd.h>

@@ -2,8 +2,7 @@
  * license   : ISC; see accompanying COPYING file
  */
 
-/*
- * Enable assertions.
+/* Enable assertions.
  */
 #ifdef NDEBUG
 #  undef NDEBUG
@@ -23,8 +22,7 @@ error_handler (const char* msg, const pkgconf_client_t* c, const void* d)
   (void) c; /* Unused. */
   (void) d; /* Unused. */
 
-  /*
-   * Seems it always have a trailing newline char. Probably it still a good
+  /* Seems it always have a trailing newline char. Probably it still a good
    * idea to check if it is. Let's see if it ever be missed.
    *
    */
@@ -53,15 +51,14 @@ tuples_print (pkgconf_list_t *list)
   {
     pkgconf_tuple_t *tuple = node->data;
 
-    // Skip the automatically added variable.
-    //
+    /* Skip the automatically added variable.
+     */
     if (strcmp (tuple->key, "pcfiledir") != 0)
       printf("%s %s\n", tuple->key, tuple->value);
   }
 }
 
-/*
- * Usage: argv[0] (--cflags|--libs|--vars) <path>
+/* Usage: argv[0] (--cflags|--libs|--vars) <path>
  *
  * Print package compiler flags, linker flags or variable name/values one per
  * line. The specified package file must have .pc extension.
@@ -115,8 +112,8 @@ main (int argc, const char* argv[])
   assert (i + 1 == argc);
   const char* path = argv[i];
 
-  // Make sure the file has .pc extension.
-  //
+  /* Make sure the file has .pc extension.
+   */
   size_t n = strlen (path);
   assert (n > 3 && strcmp (path + n - 3, ".pc") == 0);
 
