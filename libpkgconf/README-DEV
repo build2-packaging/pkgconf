@@ -40,10 +40,7 @@ $ mv fragment.c fragment.c.orig
 $ cp fragment.c.orig fragment.c
 
 $ git apply dont-merge-fragments.patch
-
-Note that the patch is produces by the following command:
-
-$ git diff >dont-merge-fragments.patch
+$ git apply dont-drop-fragments.patch
 
 Also fix the MinGW GCC 10 -Wformat warning:
 
@@ -51,3 +48,7 @@ $ mv stdinc.h stdinc.h.orig
 $ cp stdinc.h.orig stdinc.h
 
 $ git apply fix-mingw-wformat-warning.patch
+
+Note that the patches are produces by commands similar to the following:
+
+$ git diff >dont-merge-fragments.patch

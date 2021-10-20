@@ -1,6 +1,6 @@
 : 1
 name: libpkgconf
-version: 1.6.3+4
+version: 1.6.3+5
 project: pkgconf
 summary: C library for retriving pkg-config compiler and linker flags
 license: ISC AND MIT ; ISC for the most of original files.
@@ -12,7 +12,7 @@ src-url: https://git.build2.org/cgit/packaging/pkgconf/pkgconf/tree/libpkgconf/
 package-url: https://git.build2.org/cgit/packaging/pkgconf/
 email: packaging@build2.org ; Report issues at https://todo.sr.ht/~kaniini/pkgconf.
 package-email: packaging@build2.org ; Mailing list.
-build-email: builds@build2.org
-builds: all
+build-warning-email: builds@build2.org
+builds: host
 depends: * build2 >= 0.11.0
 depends: * bpkg >= 0.11.0

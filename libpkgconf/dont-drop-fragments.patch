@@ -1,0 +1,28 @@
+diff --git a/libpkgconf/libpkgconf/fragment.c b/libpkgconf/libpkgconf/fragment.c
+index 37830c8..42d5f95 100644
+--- a/libpkgconf/libpkgconf/fragment.c
++++ b/libpkgconf/libpkgconf/fragment.c
+@@ -341,13 +341,16 @@ pkgconf_fragment_copy(const pkgconf_client_t *client, pkgconf_list_t *list, cons
+ {
+ 	pkgconf_fragment_t *frag;
+ 
+-	if ((frag = pkgconf_fragment_exists(list, base, client->flags, is_private)) != NULL)
+-	{
+-		if (pkgconf_fragment_should_merge(frag))
+-			pkgconf_fragment_delete(list, frag);
+-	}
+-	else if (!is_private && !pkgconf_fragment_can_merge_back(base, client->flags, is_private) && (pkgconf_fragment_lookup(list, base) != NULL))
+-		return;
++  if (!(client->flags & PKGCONF_PKG_PKGF_DONT_MERGE_SPECIAL_FRAGMENTS))
++  {
++    if ((frag = pkgconf_fragment_exists(list, base, client->flags, is_private)) != NULL)
++    {
++      if (pkgconf_fragment_should_merge(frag))
++        pkgconf_fragment_delete(list, frag);
++    }
++    else if (!is_private && !pkgconf_fragment_can_merge_back(base, client->flags, is_private) && (pkgconf_fragment_lookup(list, base) != NULL))
++      return;
++  }
+ 
+ 	frag = calloc(sizeof(pkgconf_fragment_t), 1);
+ 

@@ -143,3 +143,31 @@
       Security
     EOO
 }
+
+: no-drop
+:
+: Test that the -framework options are not dropped.
+:
+{
+  +cat <<EOI >=libfoo.pc
+    Name: libfoo
+    Description: Foo library
+    Version: 1.0
+    Libs: -L/Users/build/install/lib -lcurl -framework Cocoa -framework IOKit -framework CoreFoundation
+    EOI
+
+  f = $~/libfoo.pc
+
+  : libs
+  :
+  $* --libs $f >>EOO
+    L /Users/build/install/lib
+    l curl
+      -framework
+      Cocoa
+      -framework
+      IOKit
+      -framework
+      CoreFoundation
+    EOO
+}

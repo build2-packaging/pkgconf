@@ -1,9 +1,5 @@
 On the revision:
 
-- Disable the success build emails.
-
-- Remove the redundant empty comment line in tests/basic/driver.c.
-
 On the release:
 
 - Use legal{} target type for legal documentation (LICENSE, AUTHORS, etc).

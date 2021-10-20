@@ -24,7 +24,6 @@ error_handler (const char* msg, const pkgconf_client_t* c, const void* d)
 
   /* Seems it always have a trailing newline char. Probably it still a good
    * idea to check if it is. Let's see if it ever be missed.
-   *
    */
   fprintf (stderr, "%s", msg);
   return true;
@@ -127,7 +126,9 @@ main (int argc, const char* argv[])
   int r = 1;
   int max_depth = 2000;
 
-  pkgconf_client_set_flags (c, PKGCONF_PKG_PKGF_DONT_MERGE_SPECIAL_FRAGMENTS);
+  const int pkgconf_flags = PKGCONF_PKG_PKGF_DONT_MERGE_SPECIAL_FRAGMENTS;
+
+  pkgconf_client_set_flags (c, pkgconf_flags);
   pkgconf_pkg_t* p = pkgconf_pkg_find (c, path);
 
   if (p != NULL)
@@ -138,7 +139,9 @@ main (int argc, const char* argv[])
     {
     case dump_cflags:
       {
-        pkgconf_client_set_flags (c, PKGCONF_PKG_PKGF_SEARCH_PRIVATE);
+        pkgconf_client_set_flags (c,
+                                  pkgconf_flags |
+                                  PKGCONF_PKG_PKGF_SEARCH_PRIVATE);
 
         pkgconf_list_t list = PKGCONF_LIST_INITIALIZER;
         e = pkgconf_pkg_cflags (c, p, &list, max_depth);
@@ -152,6 +155,7 @@ main (int argc, const char* argv[])
     case dump_libs:
       {
         pkgconf_client_set_flags (c,
+                                  pkgconf_flags                   |
                                   PKGCONF_PKG_PKGF_SEARCH_PRIVATE |
                                   PKGCONF_PKG_PKGF_MERGE_PRIVATE_FRAGMENTS);
 
