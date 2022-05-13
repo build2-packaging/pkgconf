@@ -19,14 +19,17 @@
 
 /*
  * strndup() is not present on Windows while strl*() are only present on
- * FreeBSD and MacOS.
+ * *BSD and MacOS.
  *
  */
 #if !defined(_WIN32)
 #  define HAVE_STRNDUP 1
 #endif
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__APPLE__)
+#if defined(__FreeBSD__) || \
+    defined(__OpenBSD__) || \
+    defined(__NetBSD__)  || \
+    defined(__APPLE__)
 #  define HAVE_STRLCPY 1
 #  define HAVE_STRLCAT 1
 #endif
