@@ -1,7 +1,12 @@
 On the revision:
 
+- Spellcheck summary in manifest.
+
 On the release:
 
 - Use legal{} target type for legal documentation (LICENSE, AUTHORS, etc).
 
   Note that this requires bumping build2 version requirement to 0.13.0.
+
+- Redo header installation using c.pkgconfig.include mechanism available
+  since 0.15.0.
